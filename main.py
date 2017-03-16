@@ -1,24 +1,43 @@
-import webrepl
-import xyz
 import machine
+import webrepl
+import wlan_driver
+import pwm_driver
+import mic_driver
 
+_settings = {}
+
+
+def load_settings():
+    global _settings
+    with open("settings", "r") as f:
+        data = f.readlines()
+        _settings["ip"] = data[0].strip()
+        _settings["wifi"] = []
+        for wifi in data[1:]:
+            ssid, password = wifi.split(";")
+            _settings["wifi"].append(
+                {"ssid": ssid, "password": password.strip("\n")})
+        f.close()
+
+
+def save_settings():
+    with open("settings", "w") as f:
+        f.write(_settings["ip"])
+        for wifi in _settings["wifi"]:
+            f.write("\n" + wifi["ssid"] + ";" + wifi["password"])
+        f.close()
+
+load_settings()
+
+wlan = wlan_driver.setup(_settings)
 webrepl.start()
 
-xyz.init_xyz()
-wifi = xyz.setup_wifi()
+pwm = pwm_driver.setup()
+pwm_driver.rgbw(pwm, 1024, 0, 0, 0)
 
-# wlan = network.WLAN(network.STA_IF)  # create station interface
-# wlan.active(False)       # activate the interface
+sock = wlan_driver.create_socket(wlan)
 
-# ap = network.WLAN(network.AP_IF)  # create access-point interface
-# ap.active(True)         # activate the interface
-# # set the ESSID of the access point
-# ap.config(essid='XYZ', password='xyzxyzxyz')
-
-# Wait for connection
-while not wifi.isconnected():
-    machine.idle()
-
-s = xyz.create_socket(wifi)
-# # Run main loop
-xyz.receive_osc(s)
+while True:
+    addr, data = wlan_driver.parse_osc(sock.recv(64))
+    if addr == "/rgbw":
+        pwm_driver.rgbw(pwm, data[0], data[1], data[2], data[3])
