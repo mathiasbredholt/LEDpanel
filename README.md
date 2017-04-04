@@ -1,5 +1,5 @@
 Download with
-git pull --recursive
+git clone --recursive
 
 Upload firmware following this guide
 - https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html
