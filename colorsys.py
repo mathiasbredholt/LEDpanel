@@ -1,3 +1,6 @@
+# Module to convert between RGB and HSV color spaces
+
+
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
         return v, v, v

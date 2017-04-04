@@ -6,6 +6,11 @@ TYPETAG_STR = 115
 
 
 def setup(settings):
+    '''
+    Connects to known WiFi networks and returns nework device
+    If none of the known WiFi networks are found
+    creates WiFi hotspot XYZ with password xyzxyzxyz
+    '''
     wlan = network.WLAN(network.STA_IF)  # Create station interface
     wlan.active(True)
 
@@ -31,12 +36,21 @@ def setup(settings):
 
 
 def create_socket(device):
+    '''
+    Initializes UDP socket with given device returned from setup
+    '''
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((device.ifconfig()[0], 1811))
     return sock
 
 
 def parse_osc(msg):
+    '''
+    Parses raw UDP datagram into a simple OSC message
+    Returns a tuple (addr, data)
+    addr is a string of the type '/manual' or '/do/cool/stuff'
+    data is a variable sized list containing 32 bit integers [ int, int, int, ...]
+    '''
     # convert to bytearray and add , character to end
     address = ""
     index = 0
