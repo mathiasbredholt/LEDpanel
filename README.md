@@ -11,13 +11,18 @@ https://github.com/adafruit/ampy
 
 Put following files in the root folder of ESP
 main.py
+
 pwm_driver.py
+
 mic_driver.py
+
 wlan_driver.py
+
 externals/pca9685/pca9685.py
 
 Connect PCA9685
 SCL -> GPIO5 (D1 on Lolin dev board)
+
 SDA -> GPIO4 (D2 on Lolin dev board)
 
 After reboot it should work.
