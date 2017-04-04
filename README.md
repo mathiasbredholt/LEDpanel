@@ -15,6 +15,7 @@ Put following files in the root folder of ESP
 - mic_driver.py
 - wlan_driver.py
 - externals/pca9685/pca9685.py
+- settings
 
 Connect PCA9685
 - SCL -> GPIO5 (D1 on Lolin dev board)
