@@ -14,6 +14,7 @@ Put following files in the root folder of ESP
 - pwm_driver.py
 - mic_driver.py
 - wlan_driver.py
+- uosc.py
 - externals/pca9685/pca9685.py
 - settings
 
