@@ -1,16 +1,13 @@
 import network
 import socket
 
-TYPETAG_INT = 105
-TYPETAG_STR = 115
-
 
 def setup(settings):
-    '''
+    """
     Connects to known WiFi networks and returns nework device
     If none of the known WiFi networks are found
     creates WiFi hotspot XYZ with password xyzxyzxyz
-    '''
+    """
     wlan = network.WLAN(network.STA_IF)  # Create station interface
     wlan.active(True)
 
@@ -36,47 +33,9 @@ def setup(settings):
 
 
 def create_socket(device):
-    '''
+    """
     Initializes UDP socket with given device returned from setup
-    '''
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((device.ifconfig()[0], 1811))
     return sock
-
-
-def parse_osc(msg):
-    '''
-    Parses raw UDP datagram into a simple OSC message
-    Returns a tuple (addr, data)
-    addr is a string of the type '/manual' or '/do/cool/stuff'
-    data is a variable sized list containing 32 bit integers [ int, int, int, ...]
-    '''
-    # convert to bytearray and add , character to end
-    address = ""
-    index = 0
-    from_typetags = bytearray()
-    typetags = []
-    data = []
-    # separate message into bytesarray for each argument
-    for i, x in enumerate(msg):
-        if x == 44:  # , separator
-            address = msg[0:i].decode().rstrip("\0")
-            index = i + 1
-            from_typetags = msg[index:]
-    for x in from_typetags:
-        if x == TYPETAG_INT:
-            typetags.append(TYPETAG_INT)
-        elif x == TYPETAG_STR:
-            typetags.append(TYPETAG_STR)
-        else:
-            index = index + 4 - (index % 4)
-            break
-        index = index + 1
-    for x in typetags:
-        if x == TYPETAG_INT:
-            data.append(
-                (msg[index] << 24) | (msg[index + 1] << 16) | (
-                    msg[index + 2] << 8) | msg[index + 3]
-            )
-            index = index + 4
-    return address, data

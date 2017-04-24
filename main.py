@@ -5,6 +5,7 @@ import webrepl
 import wlan_driver
 import pwm_driver
 import mic_driver
+import uosc
 
 # Initialize global settings dictionary
 _settings = {}
@@ -51,13 +52,48 @@ pwm_driver.rgbw(pwm, 1024, 0, 0, 0)
 # Create UDP socket
 sock = wlan_driver.create_socket(wlan)
 
+time = 0
+timer1 = None
+
+
+def timer_callback(t):
+    global time
+    time = time + 1
+    print(time)
+
 # Main application loop
 while 1:
     # Call sock.recv which is blocking
     # and parse into a OSC message
-    addr, data = wlan_driver.parse_osc(sock.recv(64))
-    if addr == "/rgbw":
-        pwm_driver.rgbw(pwm, data[0], data[1], data[2], data[3])
+
+    datagram = sock.recv(64)
+
+    if uosc.is_bundle(datagram):
+        msg = uosc.OSCBundle(datagram)
+        timetag = msg.timetag
+
+        print(msg.data[0])
+        if type(msg.data[0]) is uosc.OSCMessage:
+            msg = msg.data[0]
+            if msg.address == "/time":
+                global time
+                time = timetag[0]
+                timer1.init(period=1000, mode=machine.Timer.PERIODIC,
+                            callback=timer_callback)
+
+    else:
+        msg = uosc.OSCMessage(datagram)
+
+        if msg.address == "/rgbw":
+            pwm_driver.rgbw(pwm, msg.data[0], msg.data[
+                1], msg.data[2], msg.data[3])
+
+    # msg = wlan_driver.OSCMessage(sock.recv(64))
+    # if msg.address == "/rgbw":
+    #
+    # else:
+    #     if msg.type == wlan_driver.OSCBUNDLE:
+    #         print(msg.address, msg.data, msg.timetag)
     # Add new messages here
-    # elif addr == "/matightass"
+    # elif address == "/matightass"
     #   pwm.duty(chan (0-15), val (0-4095))
