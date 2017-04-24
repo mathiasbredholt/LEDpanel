@@ -77,7 +77,7 @@ while 1:
             msg = msg.data[0]
             if msg.address == "/time":
                 global time
-                time = timetag[0]
+                time = int(timetag)
                 timer1.init(period=1000, mode=machine.Timer.PERIODIC,
                             callback=timer_callback)
 
