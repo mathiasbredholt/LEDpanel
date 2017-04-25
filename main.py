@@ -95,13 +95,3 @@ while 1:
         if msg.address == "/rgbw":
             pwm_driver.rgbw(pwm, msg.data[0], msg.data[
                 1], msg.data[2], msg.data[3])
-
-    # msg = wlan_driver.OSCMessage(sock.recv(64))
-    # if msg.address == "/rgbw":
-    #
-    # else:
-    #     if msg.type == wlan_driver.OSCBUNDLE:
-    #         print(msg.address, msg.data, msg.timestamp)
-    # Add new messages here
-    # elif address == "/matightass"
-    #   pwm.duty(chan (0-15), val (0-4095))
