@@ -6,6 +6,10 @@ import wlan_driver
 import pwm_driver
 import mic_driver
 import uosc
+import uheapq
+
+
+TIME_TOL = const(0.001)
 
 # Initialize global settings dictionary
 _settings = {}
@@ -54,33 +58,37 @@ sock = wlan_driver.create_socket(wlan)
 
 time = 0
 timer1 = None
+pqueue = []
 
 
 def timer_callback(t):
     global time
-    time = time + 1
-    print(time)
+    time = time + TIME_TOL
+    if abs(pqueue[0][0] - time) < TIME_TOL:
+        msg = uheapq.heappop(pqueue)[1]
+        if msg.address == "/rgbw":
+            pwm_driver.rgbw(pwm, msg.data[0], msg.data[
+                1], msg.data[2], msg.data[3])
 
 # Main application loop
 while 1:
     # Call sock.recv which is blocking
-    # and parse into a OSC message
-
     datagram = sock.recv(64)
 
     if uosc.is_bundle(datagram):
         msg = uosc.OSCBundle(datagram)
-        timetag = msg.timetag
+        timestamp = msg.timestamp
 
         print(msg.data[0])
         if type(msg.data[0]) is uosc.OSCMessage:
             msg = msg.data[0]
             if msg.address == "/time":
                 global time
-                time = int(timetag)
-                timer1.init(period=1000, mode=machine.Timer.PERIODIC,
+                time = timestamp
+                timer1.init(period=int(TIME_TOL * 1000), mode=machine.Timer.PERIODIC,
                             callback=timer_callback)
-
+            else:
+                uheapq.heappush(pqueue, (timestamp, msg))
     else:
         msg = uosc.OSCMessage(datagram)
 
@@ -93,7 +101,7 @@ while 1:
     #
     # else:
     #     if msg.type == wlan_driver.OSCBUNDLE:
-    #         print(msg.address, msg.data, msg.timetag)
+    #         print(msg.address, msg.data, msg.timestamp)
     # Add new messages here
     # elif address == "/matightass"
     #   pwm.duty(chan (0-15), val (0-4095))

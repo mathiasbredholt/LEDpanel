@@ -27,8 +27,8 @@ def parse_osc_float(datagram):
     return ustruct.unpack('>f', datagram)[0]
 
 
-def parse_timetag(datagram):
-    sec, frac = ustruct.unpack('>II', datagram)
+def parse_timestamp(datagram):
+    sec, frac = ustruct.unpack('>ll', datagram)
     if (sec == 0) and (frac <= 1):
         return 0.0
     else:
@@ -39,7 +39,7 @@ class OSCBundle():
     """OSC bundle class """
 
     def __init__(self, datagram):
-        self.timetag = parse_timetag(datagram[8:16])
+        self.timestamp = parse_timestamp(datagram[8:16])
         self.data = []
 
         print(datagram)
